@@ -1,0 +1,44 @@
+:root {
+  --bg-primary: #0b0e14;
+  --bg-secondary: #111620;
+  --bg-card: #161b27;
+  --bg-card-hover: #1a2030;
+  --bg-input: #111620;
+
+  --border: #1e2636;
+  --border-focus: #3b82f6;
+
+  --text-primary: #e2e8f0;
+  --text-secondary: #8494a7;
+  --text-muted: #4a5568;
+
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-glow: rgba(59, 130, 246, 0.15);
+
+  --grade-a: #10b981;
+  --grade-b: #f59e0b;
+  --grade-c: #f97316;
+  --grade-d: #ef4444;
+  --grade-f: #dc2626;
+
+  --severity-critical: #ef4444;
+  --severity-critical-bg: rgba(239, 68, 68, 0.08);
+  --severity-warning: #f59e0b;
+  --severity-warning-bg: rgba(245, 158, 11, 0.08);
+  --severity-info: #3b82f6;
+  --severity-info-bg: rgba(59, 130, 246, 0.08);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --font-body: 'Outfit', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+  --shadow-glow: 0 0 40px rgba(59, 130, 246, 0.1);
+}
