@@ -456,7 +456,7 @@ input, select {
   font-weight: 500;
 }
 
-.filter-btn {
+.filter-button {
   padding: 5px 12px;
   font-size: 0.8rem;
   font-weight: 500;
@@ -466,9 +466,9 @@ input, select {
   transition: all 0.15s;
 }
 
-.filter-btn:hover { color: var(--text-primary); }
+.filter-button:hover { color: var(--text-primary); }
 
-.filter-btn.active {
+.filter-button.active {
   background: var(--accent);
   color: #fff;
 }
@@ -553,3 +553,4 @@ input, select {
   margin-top: 6px;
   font-weight: 500;
 }
+
