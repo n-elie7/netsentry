@@ -42,3 +42,61 @@
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
   --shadow-glow: 0 0 40px rgba(59, 130, 246, 0.1);
 }
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 60px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav__name {
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+}
+
+.nav__tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.nav__tab {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  transition: all 0.4s;
+}
+
+.nav__tab:hover {
+  color: var(--text-primary);
+  background: var(--bg-card);
+}
+
+.nav__tab.active {
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.main {
+  max-width: 970px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 5rem;
+}
