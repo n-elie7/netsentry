@@ -20,7 +20,7 @@
       </div>
       <span class="nav__name">NetSentry</span>
     </div>
-    <div class="nav__tabs">
+    <div class="nav__tabs" id="navTabs">
       <button class="nav__tab active" data-tab="scan">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
         Scanner
@@ -34,7 +34,65 @@
         Compare
       </button>
     </div>
+    <div class="nav__user" id="navUser" hidden>
+      <span class="nav__username" id="navUsername"></span>
+      <button class="nav__logout" id="logoutBtn">Logout</button>
+    </div>
   </nav>
+
+  <div class="auth-screen" id="authScreen">
+    <div class="auth-card">
+      <div class="auth-card__logo">
+        <svg width="40" height="40" viewBox="0 0 28 28" fill="none">
+          <rect width="28" height="28" rx="6" fill="var(--accent)" />
+          <path d="M8 14L12 18L20 10" stroke="var(--bg-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2 class="auth-card__title">Welcome to NetSentry</h2>
+      <p class="auth-card__sub">Sign in to scan domains and track your security reports.</p>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-auth="login">Sign In</button>
+        <button class="auth-tab" data-auth="register">Create Account</button>
+      </div>
+
+      <div class="auth-form active" id="authLogin">
+        <div class="auth-field">
+          <label class="auth-label" for="loginUsername">Username</label>
+          <input type="text" id="loginUsername" class="auth-input" placeholder="Your username" autocomplete="username" />
+        </div>
+        <div class="auth-field">
+          <label class="auth-label" for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" class="auth-input" placeholder="Your password" autocomplete="current-password" />
+        </div>
+        <div id="loginError" class="error-msg" hidden></div>
+        <button id="loginBtn" class="button button--primary button--full">
+          <span class="btn__text">Sign In</span>
+          <span class="btn__loader" hidden><span class="spinner"></span> Signing in…</span>
+        </button>
+      </div>
+
+      <div class="auth-form" id="authRegister">
+        <div class="auth-field">
+          <label class="auth-label" for="regUsername">Username</label>
+          <input type="text" id="regUsername" class="auth-input" placeholder="Choose a username (3-20 chars)" autocomplete="username" />
+        </div>
+        <div class="auth-field">
+          <label class="auth-label" for="regPassword">Password</label>
+          <input type="password" id="regPassword" class="auth-input" placeholder="At least 6 characters" autocomplete="new-password" />
+        </div>
+        <div class="auth-field">
+          <label class="auth-label" for="regPasswordConfirm">Confirm Password</label>
+          <input type="password" id="regPasswordConfirm" class="auth-input" placeholder="Repeat your password" autocomplete="new-password" />
+        </div>
+        <div id="registerError" class="error-msg" hidden></div>
+        <button id="registerBtn" class="button button--primary button--full">
+          <span class="btn__text">Create Account</span>
+          <span class="btn__loader" hidden><span class="spinner"></span> Creating…</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <main class="main">
 
@@ -107,6 +165,7 @@
               <option value="all">All Categories</option>
               <option value="ssl">SSL/TLS</option>
               <option value="threats">Threats</option>
+              <option value="reputation">Reputation</option>
               <option value="headers">Headers</option>
               <option value="whois">WHOIS</option>
               <option value="performance">Performance</option>
@@ -160,7 +219,6 @@
       <div class="pagination" id="pagination"></div>
     </section>
 
-    
     <section class="tab-content" id="tab-compare">
       <div class="section-header">
         <h2 class="section-title">Compare Domains</h2>
