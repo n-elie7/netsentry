@@ -5,4 +5,4 @@ data/
 .DS_Store
 logs/
 *.log
-package*.json
+package-lock.json
