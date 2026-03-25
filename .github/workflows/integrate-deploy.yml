@@ -1,0 +1,204 @@
+name: NetSentry Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: "22.16.0"
+  IMAGE_NAME: netsentry
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for syntax errors
+        run: node --check server.js
+
+      - name: Verify all service modules load
+        run: |
+          node -e "
+            require('./config');
+            require('./database/db');
+            require('./middleware/auth');
+            require('./middleware/errorHandler');
+            require('./routes/auth');
+            require('./routes/scan');
+            require('./routes/history');
+            require('./routes/compare');
+            require('./services/grading');
+            require('./services/headersAudit');
+            require('./services/performanceCheck');
+            require('./services/sslLabs');
+            require('./services/virusTotal');
+            require('./services/whoisLookup');
+            require('./services/domainReputation');
+            require('./utils/validators');
+            console.log('All modules loaded successfully.');
+          "
+
+      - name: Run application health check
+        run: |
+          # Start the server in background
+          node server.js &
+          SERVER_PID=$!
+          sleep 3
+
+          # Test health endpoint
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health)
+          if [ "$STATUS" != "200" ]; then
+            echo "Health check failed with status: $STATUS"
+            kill $SERVER_PID
+            exit 1
+          fi
+
+          echo "Health check passed (HTTP $STATUS)"
+
+          # Test that static files are served
+          HTML_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/)
+          if [ "$HTML_STATUS" != "200" ]; then
+            echo "Frontend not served. Status: $HTML_STATUS"
+            kill $SERVER_PID
+            exit 1
+          fi
+
+          echo "Frontend served (HTTP $HTML_STATUS)"
+
+          # Test auth endpoint rejects unauthenticated
+          AUTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/auth/me)
+          if [ "$AUTH_STATUS" != "401" ]; then
+            echo "Auth check failed. Expected 401, got: $AUTH_STATUS"
+            kill $SERVER_PID
+            exit 1
+          fi
+
+          echo "Auth protection working (HTTP $AUTH_STATUS)"
+
+          # Test scan endpoint rejects unauthenticated
+          SCAN_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:3000/api/scan \
+            -H "Content-Type: application/json" -d '{"domain":"test.com"}')
+          if [ "$SCAN_STATUS" != "401" ]; then
+            echo "Scan protection failed. Expected 401, got: $SCAN_STATUS"
+            kill $SERVER_PID
+            exit 1
+          fi
+
+          echo "Scan protection working (HTTP $SCAN_STATUS)"
+          echo "All checks passed!"
+          kill $SERVER_PID
+
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t ${{ env.IMAGE_NAME }}:${{ github.sha }} .
+
+      - name: Verify container starts and is healthy
+        run: |
+          # Run container in background
+          docker run -d \
+            --name netsentry-test \
+            -p 3000:3000 \
+            -e NODE_ENV=production \
+            -e SESSION_SECRET=ci-test-secret \
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+          # Wait for container to be ready
+          sleep 5
+
+          # Check health endpoint
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health)
+          if [ "$STATUS" != "200" ]; then
+            echo "Container health check failed: $STATUS"
+            docker logs netsentry-test
+            exit 1
+          fi
+
+          echo "Docker container healthy (HTTP $STATUS)"
+
+          # Check Docker health status
+          HEALTH=$(docker inspect --format='{{.State.Health.Status}}' netsentry-test 2>/dev/null || echo "no-healthcheck")
+          echo "Docker health status: $HEALTH"
+
+          # Cleanup
+          docker stop netsentry-test
+          docker rm netsentry-test
+
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [test, build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Deploy to Web01
+      - name: Deploy to Web01
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.WEB01_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/netsentry || exit 1
+            git pull origin main
+            npm ci --omit=dev
+            pm2 restart netsentry || pm2 start server.js --name netsentry
+            sleep 3
+            curl -sf http://localhost:3000/api/health || exit 1
+            echo "Web01 deployed successfully."
+
+      # Deploy to Web02
+      - name: Deploy to Web02
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.WEB02_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/netsentry || exit 1
+            git pull origin main
+            npm ci --omit=dev
+            pm2 restart netsentry || pm2 start server.js --name netsentry
+            sleep 3
+            curl -sf http://localhost:3000/api/health || exit 1
+            echo "Web02 deployed successfully."
+
+      # Verify load balancer
+      - name: Verify load balancer
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.LB01_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/health)
+            if [ "$STATUS" != "200" ]; then
+              echo "Load balancer check failed: $STATUS"
+              exit 1
+            fi
+            echo "Load balancer verified (HTTP $STATUS)."
