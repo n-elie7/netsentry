@@ -1,0 +1,11 @@
+node_modules
+data
+.env
+.git
+.gitignore
+.github
+*.md
+*.log
+.DS_Store
+docker-compose.yml
+nginx

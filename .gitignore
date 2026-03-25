@@ -6,3 +6,4 @@ data/
 logs/
 *.log
 package-lock.json
+nginx
