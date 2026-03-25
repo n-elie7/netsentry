@@ -174,8 +174,10 @@ jobs:
                 sudo apt install -y git
             fi
 
-            if ! command -v node &> /dev/null; then
-                sudo apt install -y nodejs npm
+            if ! command -v node &> /dev/null || [[ $(node -v | cut -d'.' -f1 | tr -d 'v') -lt 22 ]]; then
+                echo "Installing Node.js 22 LTS..."
+                curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+                sudo apt install -y nodejs
             fi
 
             if ! command -v pm2 &> /dev/null; then
@@ -190,9 +192,14 @@ jobs:
             fi
 
             cd /var/www/netsentry || exit 1
-            git pull origin main
-            npm ci --omit=dev
-            pm2 restart netsentry || pm2 start server.js --name netsentry
+
+            if [ ! -d "/var/www/netsentry/.git" ]; then
+                sudo git clone https://github.com/n-elie7/netsentry.git /var/www/netsentry
+            fi
+
+            sudo git pull origin main
+            sudo npm ci --omit=dev
+            sudo pm2 restart netsentry || pm2 start server.js --name netsentry
             sleep 3
             curl -sf http://localhost:3000/api/health || exit 1
             echo "Web01 deployed successfully."
@@ -215,8 +222,10 @@ jobs:
                 sudo apt install -y git
             fi
 
-            if ! command -v node &> /dev/null; then
-                sudo apt install -y nodejs npm
+            if ! command -v node &> /dev/null || [[ $(node -v | cut -d'.' -f1 | tr -d 'v') -lt 22 ]]; then
+                echo "Installing Node.js 22 LTS..."
+                curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+                sudo apt install -y nodejs
             fi
 
             if ! command -v pm2 &> /dev/null; then
@@ -231,9 +240,14 @@ jobs:
             fi
 
             cd /var/www/netsentry || exit 1
-            git pull origin main
-            npm ci --omit=dev
-            pm2 restart netsentry || pm2 start server.js --name netsentry
+
+            if [ ! -d "/var/www/netsentry/.git" ]; then
+                sudo git clone https://github.com/n-elie7/netsentry.git /var/www/netsentry
+            fi
+
+            sudo git pull origin main
+            sudo npm ci --omit=dev
+            sudo pm2 restart netsentry || pm2 start server.js --name netsentry
             sleep 3
             curl -sf http://localhost:3000/api/health || exit 1
             echo "Web02 deployed successfully."
