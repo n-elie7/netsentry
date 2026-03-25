@@ -165,6 +165,12 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
+            if [ ! -d "/var/www/netsentry" ]; then
+                echo "First-time setup..."
+                mkdir -p /var/www/netsentry
+                git clone https://github.com/n-elie7/netsentry.git /var/www/netsentry
+            fi
+
             cd /var/www/netsentry || exit 1
             git pull origin main
             npm ci --omit=dev
@@ -182,6 +188,12 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
+            if [ ! -d "/var/www/netsentry" ]; then
+                echo "First-time setup..."
+                mkdir -p /var/www/netsentry
+                git clone https://github.com/n-elie7/netsentry.git /var/www/netsentry
+            fi
+            
             cd /var/www/netsentry || exit 1
             git pull origin main
             npm ci --omit=dev
