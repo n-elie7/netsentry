@@ -112,8 +112,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Build Docker image
-        run: docker build -t ${{ env.IMAGE_NAME }}:${{ github.sha }} .
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+                        -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest .
 
       - name: Verify container starts and is healthy
         run: |
@@ -123,7 +131,7 @@ jobs:
             -p 3000:3000 \
             -e NODE_ENV=production \
             -e SESSION_SECRET=ci-test-secret \
-            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
           # Wait for container to be ready
           sleep 5
@@ -145,6 +153,11 @@ jobs:
           # Cleanup
           docker stop netsentry-test
           docker rm netsentry-test
+
+      - name: Push to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
 
   deploy:
     name: Deploy to Production
@@ -251,7 +264,7 @@ jobs:
             fi
 
             sudo git pull origin main
-            
+
             sudo chown -R $(whoami):$(whoami) /var/www/netsentry
             npm ci --omit=dev
 
