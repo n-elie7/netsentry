@@ -163,6 +163,7 @@ jobs:
           host: ${{ secrets.WEB01_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             cd /var/www/netsentry || exit 1
             git pull origin main
@@ -179,6 +180,7 @@ jobs:
           host: ${{ secrets.WEB02_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             cd /var/www/netsentry || exit 1
             git pull origin main
@@ -195,6 +197,7 @@ jobs:
           host: ${{ secrets.LB01_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/health)
             if [ "$STATUS" != "200" ]; then
