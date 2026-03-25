@@ -5,5 +5,4 @@ data/
 .DS_Store
 logs/
 *.log
-package-lock.json
 nginx

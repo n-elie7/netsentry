@@ -76,7 +76,7 @@ const History = (() => {
 
     let html = "";
     for (let i = 1; i <= pagination.totalPages; i++) {
-      html += `<button class="pagination__btn ${i === pagination.page ? "active" : ""}" onclick="History.goToPage(${i})">${i}</button>`;
+      html += `<button class="pagination__button ${i === pagination.page ? "active" : ""}" onclick="History.goToPage(${i})">${i}</button>`;
     }
     container.innerHTML = html;
   }

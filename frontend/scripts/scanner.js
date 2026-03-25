@@ -16,9 +16,9 @@ const Scanner = (() => {
       if (e.key === "Enter") runScan();
     });
 
-    DOM.$$(".filter-btn[data-filter]").forEach((btn) => {
+    DOM.$$(".filter-button[data-filter]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        DOM.$$(".filter-btn[data-filter]").forEach((b) => b.classList.remove("active"));
+        DOM.$$(".filter-button[data-filter]").forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
         activeFilter = btn.dataset.filter;
         renderFindings();
