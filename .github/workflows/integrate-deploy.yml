@@ -198,6 +198,8 @@ jobs:
             fi
 
             sudo git pull origin main
+
+            sudo chown -R $(whoami):$(whoami) /var/www/netsentry
             npm ci --omit=dev
 
             pm2 stop netsentry 2>/dev/null || true
@@ -249,6 +251,8 @@ jobs:
             fi
 
             sudo git pull origin main
+            
+            sudo chown -R $(whoami):$(whoami) /var/www/netsentry
             npm ci --omit=dev
 
             pm2 stop netsentry 2>/dev/null || true
