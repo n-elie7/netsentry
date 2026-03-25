@@ -165,10 +165,28 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
+            set -e
+
+            echo "Installing dependencies if missing."
+
+            if ! command -v git &> /dev/null; then
+                sudo apt update
+                sudo apt install -y git
+            fi
+
+            if ! command -v node &> /dev/null; then
+                sudo apt install -y nodejs npm
+            fi
+
+            if ! command -v pm2 &> /dev/null; then
+                sudo npm install -g pm2
+            fi
+
+            echo "Setting up project directory..."
+
             if [ ! -d "/var/www/netsentry" ]; then
                 echo "First-time setup..."
-                mkdir -p /var/www/netsentry
-                git clone https://github.com/n-elie7/netsentry.git /var/www/netsentry
+                sudo mkdir -p /var/www/netsentry
             fi
 
             cd /var/www/netsentry || exit 1
@@ -188,12 +206,30 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
+            set -e
+
+            echo "Installing dependencies if missing."
+
+            if ! command -v git &> /dev/null; then
+                sudo apt update
+                sudo apt install -y git
+            fi
+
+            if ! command -v node &> /dev/null; then
+                sudo apt install -y nodejs npm
+            fi
+
+            if ! command -v pm2 &> /dev/null; then
+                sudo npm install -g pm2
+            fi
+
+            echo "Setting up project directory..."
+
             if [ ! -d "/var/www/netsentry" ]; then
                 echo "First-time setup..."
-                mkdir -p /var/www/netsentry
-                git clone https://github.com/n-elie7/netsentry.git /var/www/netsentry
+                sudo mkdir -p /var/www/netsentry
             fi
-            
+
             cd /var/www/netsentry || exit 1
             git pull origin main
             npm ci --omit=dev
