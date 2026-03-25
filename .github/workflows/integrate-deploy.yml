@@ -198,11 +198,14 @@ jobs:
             fi
 
             sudo git pull origin main
-            sudo npm ci --omit=dev
-            sudo pm2 restart netsentry || pm2 start server.js --name netsentry
+            npm ci --omit=dev
+
+            pm2 stop netsentry 2>/dev/null || true
+            pm2 delete netsentry 2>/dev/null || true
+
+            pm2 start server.js --name netsentry
             sleep 3
             curl -sf http://localhost:3000/api/health || exit 1
-            echo "Web01 deployed successfully."
 
       # Deploy to Web02
       - name: Deploy to Web02
@@ -246,11 +249,14 @@ jobs:
             fi
 
             sudo git pull origin main
-            sudo npm ci --omit=dev
-            sudo pm2 restart netsentry || pm2 start server.js --name netsentry
+            npm ci --omit=dev
+
+            pm2 stop netsentry 2>/dev/null || true
+            pm2 delete netsentry 2>/dev/null || true
+
+            pm2 start server.js --name netsentry
             sleep 3
             curl -sf http://localhost:3000/api/health || exit 1
-            echo "Web02 deployed successfully."
 
       # Verify load balancer
       - name: Verify load balancer
