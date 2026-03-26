@@ -57,12 +57,27 @@ app.use("/api/scan", scanRoutes);
 app.use("/api/history", historyRoutes);
 app.use("/api/compare", compareRoutes);
 
-// Health check endpoint
+app.use((req, res, next) => {
+  res.setHeader("X-Server-By", require("os").hostname());
+  next();
+});
+
 app.get("/api/health", (req, res) => {
+  const memUsage = process.memoryUsage();
   res.json({
     success: true,
     status: "healthy",
+    version: require("./package.json").version,
+    node: process.version,
+    pid: process.pid,
     uptime: Math.floor(process.uptime()),
+    memory: {
+      rss: Math.round(memUsage.rss / 1024 / 1024) + "MB",
+      heap_used: Math.round(memUsage.heapUsed / 1024 / 1024) + "MB",
+      heap_total: Math.round(memUsage.heapTotal / 1024 / 1024) + "MB",
+    },
+    hostname: require("os").hostname(),
+    platform: process.platform + "/" + process.arch,
     timestamp: new Date().toISOString(),
   });
 });
