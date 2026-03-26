@@ -42,7 +42,7 @@ function parseResults(domain, data) {
   findings.push({
     id: "rep-score",
     title: "Domain Reputation Score",
-    value: `${safetyScore}/100`,
+    value: `${safetyScore.toFixed(2)}/100`,
     severity: safetyScore < 40 ? "critical" : safetyScore < 70 ? "warning" : "info",
     category: "reputation",
     description:
@@ -71,7 +71,10 @@ function parseResults(domain, data) {
       for (const warning of test.warnings) {
         const cat = categorizeWarning(test.test);
         if (!warningCategories[cat]) warningCategories[cat] = [];
-        warningCategories[cat].push(warning);
+        const msg = typeof warning === "string"
+          ? warning
+          : warning.warningDescription || warning.warningCode || warning.message || JSON.stringify(warning);
+        warningCategories[cat].push(msg);
       }
     }
 
