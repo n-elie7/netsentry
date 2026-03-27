@@ -1,0 +1,79 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netsentry
+  namespace: netsentry
+  labels:
+    app: netsentry
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: netsentry
+  template:
+    metadata:
+      labels:
+        app: netsentry
+    spec:
+      containers:
+        - name: netsentry
+          image: technura/netsentry:latest
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "3000"
+            - name: NODE_ENV
+              value: "production"
+            - name: VIRUSTOTAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: netsentry-secrets
+                  key: VIRUSTOTAL_API_KEY
+            - name: WHOISXML_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: netsentry-secrets
+                  key: WHOISXML_API_KEY
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: netsentry-secrets
+                  key: SESSION_SECRET
+
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+
+          # storage for scan history
+          volumeMounts:
+            - name: scan-data
+              mountPath: /app/data
+
+      volumes:
+        - name: scan-data
+          emptyDir: {}

@@ -1,0 +1,18 @@
+# This acts as the load balancer to distribute traffic.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: netsentry
+  namespace: netsentry
+  labels:
+    app: netsentry
+spec:
+  type: LoadBalancer
+  selector:
+    app: netsentry
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 3000
