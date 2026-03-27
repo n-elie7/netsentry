@@ -47,10 +47,10 @@ function parseResults(domain, data) {
     category: "reputation",
     description:
       safetyScore < 40
-        ? `Safety score is ${safetyScore}/100 — this domain has a poor reputation and may be dangerous.`
+        ? `Safety score is ${safetyScore.toFixed(2)}/100, this domain has a poor reputation and may be dangerous.`
         : safetyScore < 70
-        ? `Safety score is ${safetyScore}/100 — some reputation concerns exist.`
-        : `Safety score is ${safetyScore}/100 — this domain has a good reputation.`,
+        ? `Safety score is ${safetyScore.toFixed(2)}/100, some reputation concerns exist.`
+        : `Safety score is ${safetyScore.toFixed(2)}/100, this domain has a good reputation.`,
   });
 
   if (data.testResults && data.testResults.length > 0) {
