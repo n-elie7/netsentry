@@ -4,8 +4,11 @@ const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 const session = require("express-session");
-const { createClient } = require("redis");
-const RedisStore = require("connect-redis").default;
+let createClient, RedisStore;
+try {
+  createClient = require("redis").createClient;
+  RedisStore = require("connect-redis").default;
+} catch {}
 const rateLimit = require("express-rate-limit");
 const path = require("path");
 
@@ -20,6 +23,7 @@ const compareRoutes = require("./routes/compare");
 
 // app initialization
 const app = express();
+app.set("trust proxy", 1);
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
