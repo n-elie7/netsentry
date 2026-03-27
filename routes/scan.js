@@ -29,6 +29,34 @@ router.post("/", requireAuth, async (req, res) => {
   try {
     console.log(`[SCAN] Starting scan for: ${domain}`);
 
+    // does the domain even exist?
+    const dns = require("dns").promises;
+    try {
+      await dns.resolve4(domain);
+    } catch {
+      return res.json({
+        success: true,
+        data: {
+          id: scanId,
+          domain,
+          grade: "F",
+          score: 0,
+          summary: "This domain does not exist or has no DNS records.",
+          breakdown: {},
+          findings: [{
+            id: "dns-fail",
+            title: "Domain Not Found",
+            value: "DNS resolution failed",
+            severity: "critical",
+            category: "performance",
+            description: `The domain "${domain}" could not be resolved. It may not exist, is misspelled, or has no DNS records configured.`,
+          }],
+          stats: { total: 1, critical: 1, warning: 0, info: 0 },
+          scannedAt: new Date().toISOString(),
+        },
+      });
+    }
+
     // optimized performance by running all analysis in parallel for high speed
     const [sslResult, vtResult, whoisResult, repResult, headersResult, perfResult] =
       await Promise.allSettled([

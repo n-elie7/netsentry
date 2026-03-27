@@ -65,6 +65,11 @@ app.use(
   })
 );
 
+app.use((req, res, next) => {
+  res.setHeader("X-Server-By", require("os").hostname());
+  next();
+});
+
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, "frontend")));
 
@@ -73,10 +78,6 @@ app.use("/api/scan", scanRoutes);
 app.use("/api/history", historyRoutes);
 app.use("/api/compare", compareRoutes);
 
-app.use((req, res, next) => {
-  res.setHeader("X-Server-By", require("os").hostname());
-  next();
-});
 
 app.get("/api/health", (req, res) => {
   const memUsage = process.memoryUsage();
