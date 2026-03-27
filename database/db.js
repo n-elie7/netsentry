@@ -9,15 +9,45 @@ const USERS_PATH = path.join(DATA_DIR, "users.json");
 
 let scans = [];
 let users = [];
+let redisClient = null;
+let useRedis = false;
 
 
-function init() {
+async function init() {
+  const config = require("../config");
+
+  if (config.redis && config.redis.url) {
+    try {
+      const { createClient } = require("redis");
+      redisClient = createClient({ url: config.redis.url });
+
+      redisClient.on("error", (err) => {
+        console.error("[DB] Redis error:", err.message);
+      });
+
+      await redisClient.connect();
+      useRedis = true;
+
+      // Load existing data from Redis into memory cache
+      const redisUsers = await redisClient.get("netsentry:users");
+      const redisScans = await redisClient.get("netsentry:scans");
+      users = redisUsers ? JSON.parse(redisUsers) : [];
+      scans = redisScans ? JSON.parse(redisScans) : [];
+
+      console.log(`[DB] Redis connected. Loaded ${users.length} users, ${scans.length} scans.`);
+      return;
+    } catch (err) {
+      console.error("[DB] Redis connection failed, falling back to JSON files:", err.message);
+      useRedis = false;
+    }
+  }
+
+  // fallback to local JSON file storage if redis is inactive
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
   scans = loadFile(SCANS_PATH);
   users = loadFile(USERS_PATH);
-
-  console.log(`[DB] Loaded ${users.length} users, ${scans.length} scans from disk.`);
+  console.log(`[DB] JSON storage. Loaded ${users.length} users, ${scans.length} scans from disk.`);
 }
 
 function loadFile(filePath) {
@@ -31,12 +61,20 @@ function loadFile(filePath) {
   return [];
 }
 
-function persistScans() {
-  fs.writeFileSync(SCANS_PATH, JSON.stringify(scans, null, 2));
+async function persistUsers() {
+  if (useRedis && redisClient) {
+    await redisClient.set("netsentry:users", JSON.stringify(users));
+  } else {
+    fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
+  }
 }
 
-function persistUsers() {
-  fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
+async function persistScans() {
+  if (useRedis && redisClient) {
+    await redisClient.set("netsentry:scans", JSON.stringify(scans));
+  } else {
+    fs.writeFileSync(SCANS_PATH, JSON.stringify(scans, null, 2));
+  }
 }
 
 
@@ -58,7 +96,6 @@ function createUser({ id, username, passwordHash }) {
 function findUserByUsername(username) {
   return users.find((u) => u.username === username.toLowerCase()) || null;
 }
-
 
 function findUserById(id) {
   const user = users.find((u) => u.id === id);
@@ -132,7 +169,6 @@ function getScanCount({ userId, search, grade }) {
 
   return filtered.length;
 }
-
 
 function deleteScan(id, userId) {
   const idx = scans.findIndex((s) => s.id === id && s.userId === userId);

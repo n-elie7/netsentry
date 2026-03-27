@@ -30,5 +30,9 @@ module.exports = {
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   },
 
+  redis: {
+    url: process.env.REDIS_URL || null,
+  },
+
   scanTimeout: 30000,
 };
