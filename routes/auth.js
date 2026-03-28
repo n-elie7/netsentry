@@ -31,7 +31,7 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    const existing = db.findUserByUsername(username);
+    const existing = await db.findUserByUsername(username);
     if (existing) {
       return res.status(409).json({
         success: false,
@@ -76,7 +76,7 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const user = db.findUserByUsername(username);
+    const user = await db.findUserByUsername(username);
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -127,7 +127,7 @@ router.post("/logout", (req, res) => {
 });
 
 
-router.get("/me", (req, res) => {
+router.get("/me", async (req, res) => {
   if (!req.session || !req.session.userId) {
     return res.status(401).json({
       success: false,
@@ -135,7 +135,7 @@ router.get("/me", (req, res) => {
     });
   }
 
-  const user = db.findUserById(req.session.userId);
+  const user = await db.findUserById(req.session.userId);
   if (!user) {
     return res.status(401).json({
       success: false,

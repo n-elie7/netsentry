@@ -109,7 +109,7 @@ router.post("/", requireAuth, async (req, res) => {
     };
 
     try {
-      db.saveScan({
+      await db.saveScan({
         id: scanId,
         userId: req.session.userId,
         domain,
@@ -128,13 +128,13 @@ router.post("/", requireAuth, async (req, res) => {
     console.error(`[SCAN] Error scanning ${domain}:`, error.message);
     res.status(500).json({
       success: false,
-      error: { message: "An unexpected error occurred during the scan. Please try again." },
+      error: { message: "Domain doesn't exist. Please try again." },
     });
   }
 });
 
-router.get("/:id", requireAuth, (req, res) => {
-  const scan = db.getScanById(req.params.id, req.session.userId);
+router.get("/:id", requireAuth, async (req, res) => {
+  const scan = await db.getScanById(req.params.id, req.session.userId);
 
   if (!scan) {
     return res.status(404).json({

@@ -4,7 +4,7 @@ const { requireAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
-router.get("/", requireAuth, (req, res) => {
+router.get("/", requireAuth, async (req, res) => {
   try {
     const { search, grade, sortBy, order } = req.query;
     const limit = Math.min(parseInt(req.query.limit) || 20, 100);
@@ -12,8 +12,8 @@ router.get("/", requireAuth, (req, res) => {
     const offset = (page - 1) * limit;
     const userId = req.session.userId;
 
-    const scans = db.getHistory({ userId, search, grade, sortBy, order, limit, offset });
-    const total = db.getScanCount({ userId, search, grade });
+    const scans = await db.getHistory({ userId, search, grade, sortBy, order, limit, offset });
+    const total = await db.getScanCount({ userId, search, grade });
 
     res.json({
       success: true,
@@ -37,9 +37,9 @@ router.get("/", requireAuth, (req, res) => {
 });
 
 
-router.delete("/:id", requireAuth, (req, res) => {
+router.delete("/:id", requireAuth, async (req, res) => {
   try {
-    const result = db.deleteScan(req.params.id, req.session.userId);
+    const result = await db.deleteScan(req.params.id, req.session.userId);
 
     if (result.changes === 0) {
       return res.status(404).json({

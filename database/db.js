@@ -93,17 +93,30 @@ function createUser({ id, username, passwordHash }) {
 }
 
 
-function findUserByUsername(username) {
+async function findUserByUsername(username) {
+  if (useRedis && redisClient) {
+    const data = await redisClient.get("netsentry:users");
+    if (data) users = JSON.parse(data);
+  }
   return users.find((u) => u.username === username.toLowerCase()) || null;
 }
 
-function findUserById(id) {
+async function findUserById(id) {
+  if (useRedis && redisClient) {
+    const data = await redisClient.get("netsentry:users");
+    if (data) users = JSON.parse(data);
+  }
   const user = users.find((u) => u.id === id);
   if (!user) return null;
   return { id: user.id, username: user.username, created_at: user.created_at };
 }
 
-function saveScan({ id, userId, domain, grade, score, results }) {
+async function saveScan({ id, userId, domain, grade, score, results }) {
+  if (useRedis && redisClient) {
+    const data = await redisClient.get("netsentry:scans");
+    if (data) scans = JSON.parse(data);
+  }
+
   scans.unshift({
     id,
     userId,
@@ -120,7 +133,12 @@ function saveScan({ id, userId, domain, grade, score, results }) {
 }
 
 
-function getHistory({ userId, search, grade, sortBy, order, limit, offset }) {
+async function getHistory({ userId, search, grade, sortBy, order, limit, offset }) {
+  if (useRedis && redisClient) {
+    const data = await redisClient.get("netsentry:scans");
+    if (data) scans = JSON.parse(data);
+  }
+
   let filtered = scans.filter((s) => s.userId === userId);
 
   if (search) {
@@ -149,13 +167,23 @@ function getHistory({ userId, search, grade, sortBy, order, limit, offset }) {
 }
 
 
-function getScanById(id, userId) {
+async function getScanById(id, userId) {
+  if (useRedis && redisClient) {
+    const data = await redisClient.get("netsentry:scans");
+    if (data) scans = JSON.parse(data);
+  }
+
   const scan = scans.find((s) => s.id === id && s.userId === userId);
   return scan || null;
 }
 
 
-function getScanCount({ userId, search, grade }) {
+async function getScanCount({ userId, search, grade }) {
+  if (useRedis && redisClient) {
+    const data = await redisClient.get("netsentry:scans");
+    if (data) scans = JSON.parse(data);
+  }
+
   let filtered = scans.filter((s) => s.userId === userId);
 
   if (search) {
@@ -170,7 +198,12 @@ function getScanCount({ userId, search, grade }) {
   return filtered.length;
 }
 
-function deleteScan(id, userId) {
+async function deleteScan(id, userId) {
+  if (useRedis && redisClient) {
+    const data = await redisClient.get("netsentry:scans");
+    if (data) scans = JSON.parse(data);
+  }
+
   const idx = scans.findIndex((s) => s.id === id && s.userId === userId);
   if (idx === -1) return { changes: 0 };
 
