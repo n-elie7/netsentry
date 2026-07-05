@@ -93,7 +93,7 @@
 |-----|---------|------|-----------|------|
 | [SSL Labs API](https://www.ssllabs.com/projects/ssllabs-apis/) (Qualys) | SSL/TLS certificate and configuration analysis | No key needed | Unlimited | [Docs](https://github.com/ssllabs/ssllabs-scan/blob/master/ssllabs-api-docs-v3.md) |
 | [VirusTotal API](https://www.virustotal.com/) | Malware, phishing and blacklist scanning | API key required | 500 req/day | [Docs](https://developers.virustotal.com/reference/overview) |
-| [WhoisXML WHOIS API](https://whoisxmlapi.com/) | Domain WHOIS registration data | API key required | 500 req/month | [Docs](https://whoisxmlapi.com/documentation) |
+| [WhoisXML WHOIS API](https://whoisxmlapi.com/) | Domain WHOIS registration data | API key required | 500 req/month | [Docs](https://whois.whoisxmlapi.com/documentation/making-requests) |
 | [WhoisXML Domain Reputation API](https://domain-reputation.whoisxmlapi.com/) | Domain safety score and threat categories | Same key as WHOIS | 500 req/month | [Docs](https://domain-reputation.whoisxmlapi.com/api/documentation) |
 
 Security headers audit and performance checks are implemented directly in the application without external APIs, ensuring the app provides value even if APIs are unavailable.
